@@ -7,11 +7,12 @@ const __dirname = dirname(__filename);
 
 (async function main() {
     await esb.build({
-        entryPoints: [ join(__dirname, "../src/main.ts") ],
+        entryPoints: [ join(__dirname, "../src/main.tsx") ],
         bundle: true,
-        outfile: join(__dirname, "../dist/out.js"), 
+        outfile: join(__dirname, "../dist/out.cjs"), 
         platform: "node",
         minify: true,
-        sourcemap: true
+        sourcemap: true,
+        format: "cjs"
     });
 })();

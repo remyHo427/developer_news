@@ -6,14 +6,20 @@
   "license": "MIT",
   "scripts": {
     "build": "node ./scripts/main.js",
+    "start": "node ./dist/out.cjs",
+    "dev": "yarn build && yarn start",
     "lint": "eslint ."
   },
-  "dependencies": {},
+  "dependencies": {
+    "preact": "^10.20.1",
+    "wouter-preact": "^3.1.1"
+  },
   "devDependencies": {
     "@types/node": "^20.11.30",
     "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "fastify": "^4.26.2",
+    "preact-render-to-string": "^6.4.1",
     "prettier": "^3.2.5",
     "typescript": "^5.4.3",
     "typescript-eslint": "^7.3.1"
