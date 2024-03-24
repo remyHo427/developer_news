@@ -1,35 +1,68 @@
 /** @jsx h */
 import { h } from "preact";
-import { Switch, Link, Route } from "wouter-preact";
-import Counter from "./pages/counter";
+import { useState } from "preact/hooks";
+import { Switch, Link, Route, useLocation } from "wouter-preact";
+import Homepage from "./pages/homepage";
 
-const App = () => {
+export function App() {
     return (
-        <div>
-            <nav>
-                <Link to="/">home</Link>
-                <Link to="/about">about</Link>
-                <Link to="/test">test</Link>
-                <Link to="/counter">counter</Link>
-            </nav>
-            <Switch>
-                <Route path="/">
-                    <div>home</div>
-                </Route>
-                <Route path="/about">
-                    <div>about</div>
-                </Route>
-                <Route path="/test">
-                    <div>test</div>
-                </Route>
-                <Route path="/counter">
-                    <Counter />
-                </Route>
-                <Route>
-                    <div>404</div>
-                </Route>
-            </Switch>
+        <div className="app">
+            <div className="bg-primary">
+                <Header />
+            </div>
+            <main>
+                <Switch>
+                    <Route path="/">
+                        <Homepage />
+                    </Route>
+                    <Route>404</Route>
+                </Switch>
+            </main>
+            <footer>foot</footer>
         </div>
+    );
+}
+
+const links: { to: string; children: string }[] = [
+    {
+        to: "/projects",
+        children: "Projects",
+    },
+    {
+        to: "/meets",
+        children: "Meets",
+    },
+    {
+        to: "/blog",
+        children: "Blog",
+    },
+    {
+        to: "/about",
+        children: "About",
+    },
+];
+const Header = () => {
+    const [active, setActive] = useState<number | null>(null);
+    const [location] = useLocation();
+
+    return (
+        <header className="header">
+            <div className="left">
+                <div className="links">
+                    {links.map((p, i) => (
+                        <Link
+                            {...p}
+                            key={i}
+                            onClick={() => setActive(i)}
+                            className={
+                                location !== "/" && active === i ? "active" : ""
+                            }
+                        />
+                    ))}
+                </div>
+            </div>
+            <div className="right"></div>
+        </header>
     );
 };
 

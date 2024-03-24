@@ -34,6 +34,7 @@ fastify.get("/", (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>Page</title>
             <script defer type="module" src="/client.js"></script>
+            <link rel="stylesheet" href="/client.css">
         </head>
         <body>
             <div id="root">${render(<ServerApp req={req} res={res} />)}</div>

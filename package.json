@@ -18,6 +18,7 @@
     "@fastify/static": "^7.0.1",
     "@types/node": "^20.11.30",
     "esbuild": "^0.20.2",
+    "esbuild-sass-plugin": "^3.2.0",
     "eslint": "^8.57.0",
     "fastify": "^4.26.2",
     "preact-render-to-string": "^6.4.1",
