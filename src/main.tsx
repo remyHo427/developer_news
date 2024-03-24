@@ -11,15 +11,28 @@ const fastify = Fastify({
 });
 
 const ServerApp = ({ req, res }) => {
+    const [path, query] = req.url.split("?");
     return (
-        <Router ssrPath={req.path} ssrSearch={req.search}>
+        <Router ssrPath={path} ssrSearch={query}>
             <App />
         </Router>
     );
 };
 
 fastify.get("*", (req, res) => {
-    const rend = render(<ServerApp req={req} res={res} />);
+    const rend = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Document</title>
+        </head>
+        <body>
+            <div id="root">${render(<ServerApp req={req} res={res} />)}</div>
+        </body>
+        </html>
+    `;
 
     res.code(200).type("text/html").send(rend);
 });
