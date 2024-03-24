@@ -5,6 +5,8 @@ import { Router } from "wouter-preact";
 import process from "node:process";
 import Fastify from "fastify";
 import App from "./app";
+import fastify_static from "@fastify/static";
+import path from "node:path";
 
 const fastify = Fastify({
     logger: true,
@@ -19,14 +21,19 @@ const ServerApp = ({ req, res }) => {
     );
 };
 
-fastify.get("*", (req, res) => {
+fastify.register(fastify_static, {
+    root: path.join(__dirname, "public"),
+});
+
+fastify.get("/", (req, res) => {
     const rend = `
         <!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>Document</title>
+            <title>Page</title>
+            <script defer type="module" src="/client.js"></script>
         </head>
         <body>
             <div id="root">${render(<ServerApp req={req} res={res} />)}</div>
