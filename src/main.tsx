@@ -6,6 +6,7 @@ import process from "node:process";
 import Fastify from "fastify";
 import App from "./app";
 import fastify_static from "@fastify/static";
+import fastify_compress from "@fastify/compress";
 import path from "node:path";
 
 const fastify = Fastify({
@@ -21,6 +22,9 @@ const ServerApp = ({ req, res }) => {
     );
 };
 
+// add if client.css and client.js gets too big
+// or use an arbitrary threshold
+// fastify.register(fastify_compress);
 fastify.register(fastify_static, {
     root: path.join(__dirname, "public"),
     prefix: "/public/",
