@@ -1,7 +1,6 @@
 /** @jsx h */
-import { h } from "preact";
-import { hydrate } from "preact";
+import { h, hydrate } from "preact";
 import App from "./app";
-import "./styles/main.scss";
+import "tachyons/css/tachyons.min.css";
 
 hydrate(<App />, document.getElementById("root")!);
