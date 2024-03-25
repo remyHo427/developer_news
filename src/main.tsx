@@ -23,9 +23,10 @@ const ServerApp = ({ req, res }) => {
 
 fastify.register(fastify_static, {
     root: path.join(__dirname, "public"),
+    prefix: "/public/",
 });
 
-fastify.get("/", (req, res) => {
+fastify.get("*", (req, res) => {
     const rend = `
         <!DOCTYPE html>
         <html lang="en">
@@ -33,8 +34,8 @@ fastify.get("/", (req, res) => {
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>Page</title>
-            <script defer type="module" src="/client.js"></script>
-            <link rel="stylesheet" href="/client.css">
+            <script defer type="module" src="/public/client.js"></script>
+            <link rel="stylesheet" href="/public/client.css">
         </head>
         <body>
             <div id="root">${render(<ServerApp req={req} res={res} />)}</div>
