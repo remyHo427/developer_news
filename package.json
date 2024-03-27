@@ -5,7 +5,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "node ./scripts/main.js",
+    "build": "node ./scripts/main.mjs build",
     "start": "node ./dist/out.cjs",
     "dev": "yarn build && yarn start",
     "lint": "eslint ."
