@@ -6,12 +6,13 @@ const Header = () => {
     return (
         <div className="header">
             <nav className="func-box">
-                <Link to="/news">
+                <Link to="/">
                     <div className="logo">Developer News</div>
                 </Link>
                 <div className="links">
                     <Link to="/newest">new</Link>
                     <Link to="/past">past</Link>
+                    <Link to="/comments">comments</Link>
                     <Link to="/ask">ask</Link>
                     <Link to="/show">show</Link>
                     <Link to="/jobs">jobs</Link>
