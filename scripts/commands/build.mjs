@@ -27,6 +27,15 @@ export default async function build(cfg) {
         minify: true,
         sourcemap: true,
         format: "cjs",
+        external: [
+            "pg",
+            "tedious",
+            "oracledb",
+            "better-sqlite3",
+            "pg-query-stream",
+            "mysql",
+            "sqlite3",
+        ],
     });
 
     return await esb.build({
