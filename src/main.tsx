@@ -10,9 +10,9 @@ import fastify_compress from "@fastify/compress";
 import path from "node:path";
 import prerender, { html } from "./prerender";
 
-const routes: [string, string][] = [["/", "./index.html"]];
+const pages_map = prerender("/", "/login");
 const fastify = Fastify({
-    logger: true,
+    logger: false,
 });
 
 // add if client.css and client.js gets too big
@@ -21,24 +21,24 @@ fastify.register(fastify_compress);
 fastify.register(fastify_static, {
     root: path.join(__dirname, "public"),
     prefix: "/",
+    wildcard: false,
 });
-
-const renderHandler = (req, res) => {
+fastify.get("*", (req, res) => {
     const [path, query] = req.url.split("?");
-    const rend = html(
-        render(
-            <Router ssrPath={path} ssrSearch={query}>
-                <App />
-            </Router>,
-        ),
-    );
-    res.code(200).type("text/html").send(rend);
-};
+    const result =
+        pages_map.get(path) ||
+        html(
+            render(
+                <Router ssrPath={path} ssrSearch={query}>
+                    <App />
+                </Router>,
+            ),
+        );
+    res.code(200).type("text/html").send(result);
+});
 
 (async function main() {
     try {
-        // render static html for known pages
-        await prerender(routes);
         await fastify.listen({ port: 3000 });
     } catch (e) {
         fastify.log.error(e);

@@ -2,25 +2,26 @@
 import { h } from "preact";
 import { render } from "preact-render-to-string";
 import { Router } from "wouter-preact";
-import fs from "node:fs";
 import App from "./app";
-import { join } from "node:path";
 
-export default async function prerender(routes: [string, string][]) {
-    for (const [route, out] of routes) {
+const prerender = (...routes: string[]) => {
+    const map = new Map<string, string>();
+
+    for (const r of routes) {
         const rend = html(
             render(
-                <Router ssrPath={route} ssrSearch="">
+                <Router ssrPath={r} ssrSearch="">
                     <App />
                 </Router>,
             ),
         );
-        await fs.promises.writeFile(join(__dirname, "./public/", out), rend, {
-            encoding: "utf-8",
-        });
+        map.set(r, rend);
     }
-}
 
+    return map;
+};
+
+export default prerender;
 export const html = (str: string) => `
     <!DOCTYPE html>
     <html lang="en">

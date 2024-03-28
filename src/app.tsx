@@ -12,6 +12,9 @@ export function App() {
                 <Route path="/">
                     <Home />
                 </Route>
+                <Route path="/login">
+                    <div>login</div>
+                </Route>
                 <Route>
                     <div>404</div>
                 </Route>
