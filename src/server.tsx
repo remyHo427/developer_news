@@ -15,8 +15,6 @@ const fastify = Fastify({
     logger: false,
 });
 
-// add if client.css and client.js gets too big
-// or use an arbitrary threshold
 fastify.register(fastify_compress);
 fastify.register(fastify_static, {
     root: path.join(__dirname, "public"),

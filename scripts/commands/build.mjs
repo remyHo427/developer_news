@@ -20,7 +20,7 @@ export default async function build(cfg) {
     required(outfile, "an output file is required");
 
     await esb.build({
-        entryPoints: [resolve(__dirname, "../../src/main.tsx")],
+        entryPoints: [resolve(__dirname, "../../src/server.tsx")],
         bundle: true,
         outfile: resolve(__dirname, "../../dist/out.cjs"),
         platform: "node",
