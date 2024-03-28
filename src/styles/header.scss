@@ -8,22 +8,21 @@ div.header {
     }
     nav.func-box {
         display: flex;
+        
         div.logo {
             font-weight: bold;
         }
         div.links {
             margin-left: 0.5rem;
 
-            a + a {
-                &::before {
-                    content: "";
-                    display: inline-block;
-                    height: 90%;
-                    width: 1px;
-                    background-color: black;
-                    margin: 0 0.5rem;
-                    vertical-align: -25%;
-                }
+            a + a::before {
+                content: "";
+                display: inline-block;
+                height: 90%;
+                width: 1px;
+                background-color: black;
+                margin: 0 0.5rem;
+                vertical-align: -25%;
             }
         }
     }
