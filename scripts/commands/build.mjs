@@ -8,10 +8,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default async function build(cfg) {
-    const { entryPoint, minify, outfile, sourcemap } = {
+    const { entryPoint, minify, outfile, sourcemap, watch } = {
         ...{
             minify: true,
             sourcemap: true,
+            watch: false,
         },
         ...cfg,
     };
@@ -24,7 +25,7 @@ export default async function build(cfg) {
         bundle: true,
         outfile: resolve(__dirname, "../../dist/out.cjs"),
         platform: "node",
-        minify: true,
+        minify: false,
         sourcemap: true,
         format: "cjs",
         external: [
@@ -38,15 +39,31 @@ export default async function build(cfg) {
         ],
     });
 
-    return await esb.build({
-        entryPoints: [entryPoint],
-        minify,
-        sourcemap,
-        outfile,
-        bundle: true,
-        plugins: [sassPlugin()],
-        jsxFactory: "h",
-        jsxFragment: "fragment",
-        metafile: true,
-    });
+    if (watch) {
+        const ctx = await esb.context({
+            entryPoints: [entryPoint],
+            minify,
+            sourcemap,
+            outfile,
+            bundle: true,
+            plugins: [sassPlugin()],
+            jsxFactory: "h",
+            jsxFragment: "fragment",
+            metafile: true,
+        });
+        await ctx.watch();
+        console.log("watching...");
+    } else {
+        await esb.build({
+            entryPoints: [entryPoint],
+            minify,
+            sourcemap,
+            outfile,
+            bundle: true,
+            plugins: [sassPlugin()],
+            jsxFactory: "h",
+            jsxFragment: "fragment",
+            metafile: true,
+        });
+    }
 }

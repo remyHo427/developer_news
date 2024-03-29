@@ -34,6 +34,14 @@ export const html = (str: string) => `
     </head>
     <body>
         <div id="root">${str}</div>
+        <script>
+            const ws = new WebSocket('ws://localhost:3000');
+            ws.addEventListener('message', (event) => {
+                if (event.data === 'reload') {
+                    window.location.reload();
+                }
+            });
+        </script>
     </body>
     </html>
 `;

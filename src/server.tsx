@@ -5,23 +5,20 @@ import { Router } from "wouter-preact";
 import Fastify from "fastify";
 import fastify_static from "@fastify/static";
 import fastify_compress from "@fastify/compress";
-import path from "node:path";
+import path, { resolve } from "node:path";
 import process from "node:process";
+import * as ws from "ws";
 import knex_init from "knex";
+import chokidar from "chokidar";
 import App from "./app";
 import prerender, { html } from "./prerender";
 import attach from "./attach";
 
+const wss = new ws.WebSocketServer({ noServer: true });
+const watcher = chokidar.watch(resolve(__dirname, "./dist/public"));
 const pages_map = prerender("/", "/login");
 const fastify = Fastify({
     logger: false,
-});
-
-fastify.register(fastify_compress);
-fastify.register(fastify_static, {
-    root: path.join(__dirname, "public"),
-    prefix: "/",
-    wildcard: false,
 });
 const knex = knex_init({
     client: "mysql2",
@@ -32,6 +29,14 @@ const knex = knex_init({
         password: "guibt427",
         database: "developer_news_db",
     },
+});
+
+// plugins
+fastify.register(fastify_compress);
+fastify.register(fastify_static, {
+    root: path.join(__dirname, "public"),
+    prefix: "/",
+    wildcard: false,
 });
 
 // attach api routes (has higher precedence than ssr)
@@ -50,6 +55,24 @@ fastify.get("*", (req, res) => {
             ),
         );
     res.code(200).type("text/html").send(result);
+});
+
+// live reload (only in dev)
+wss.on("connection", (ws) => {
+    console.log("websocket for live reload connected");
+});
+watcher.on("change", (fp) => {
+    console.log("FILE CHANGED!");
+    wss.clients.forEach((c) => {
+        if (c.readyState === 1) {
+            c.send("reload");
+        }
+    });
+});
+fastify.server.on("upgrade", (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit("connection", ws, request);
+    });
 });
 
 (async function main() {
