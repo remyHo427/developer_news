@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default async function build(cfg) {
-    const { entryPoint, minify, outfile, sourcemap, watch } = {
+    const { entryPoint, minify, outfile, sourcemap, watch, db } = {
         ...{
             minify: true,
             sourcemap: true,
@@ -19,6 +19,11 @@ export default async function build(cfg) {
 
     required(entryPoint, "an entry point is required");
     required(outfile, "an output file is required");
+    required(db.host, "a database host is required");
+    required(db.port, "a database port is required");
+    required(db.user, "a database user is required");
+    required(db.password, "a database password is required");
+    required(db.database, "a database is required");
 
     await esb.build({
         entryPoints: [resolve(__dirname, "../../src/server.tsx")],
@@ -37,6 +42,13 @@ export default async function build(cfg) {
             "mysql",
             "sqlite3",
         ],
+        define: {
+            DB_HOST: db.host,
+            DB_PORT: db.port,
+            DB_USER: db.user,
+            DB_PASSWORD: db.password,
+            DB_DATABASE: db.database,
+        },
     });
 
     if (watch) {
