@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Knex } from "knex";
+
 // helpers
 export enum Method {
     GET,

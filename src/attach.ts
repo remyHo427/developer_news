@@ -5,9 +5,9 @@ import routes from "./routes/index";
 export default function attach(fastify: FastifyInstance, knex: Knex) {
     const map = [
         fastify.get,
-        fastify.delete,
-        fastify.put,
         fastify.post,
+        fastify.put,
+        fastify.delete,
     ] as const;
 
     for (const [k, r] of Object.entries(routes)) {

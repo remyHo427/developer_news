@@ -1,4 +1,0 @@
-{
-    "entryPoint": "./src/client.tsx",
-    "outfile": "./dist/public/client.js"
-}
