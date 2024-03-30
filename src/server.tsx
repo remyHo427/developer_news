@@ -21,6 +21,7 @@ const fastify = Fastify({
     logger: false,
 });
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE } = process.env;
+console.log(process.env);
 const knex = knex_init({
     client: "mysql2",
     connection: {

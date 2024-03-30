@@ -43,11 +43,11 @@ export default async function build(cfg) {
             "sqlite3",
         ],
         define: {
-            DB_HOST: db.host,
-            DB_PORT: db.port,
-            DB_USER: db.user,
-            DB_PASSWORD: db.password,
-            DB_DATABASE: db.database,
+            "process.env.DB_HOST": db.host,
+            "process.env.DB_PORT": db.port,
+            "process.env.DB_USER": db.user,
+            "process.env.DB_PASSWORD": db.password,
+            "process.env.DB_DATABASE": db.database,
         },
     });
 
