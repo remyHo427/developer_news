@@ -14,22 +14,30 @@ import App from "./app";
 import prerender, { html } from "./prerender";
 import attach from "./attach";
 
+// I really, really, **REALLY** don't want to use an
+// extra .env file, but esbuild refuses to transform
+// strings when I use the define option in build()
+
+// so I'm resorting to using dotenv for now, though
+// it annoys me to add another dependency because
+// an existing one fails to do what its documentation
+// says
+import "dotenv/config";
+
 const wss = new ws.WebSocketServer({ noServer: true });
 const watcher = chokidar.watch(resolve(__dirname, "./dist/public"));
 const pages_map = prerender("/", "/login");
 const fastify = Fastify({
     logger: false,
 });
-const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE } = process.env;
-console.log(process.env);
 const knex = knex_init({
     client: "mysql2",
     connection: {
-        host: DB_HOST,
-        port: Number.parseInt(DB_PORT as string),
-        user: DB_USER,
-        password: DB_PASSWORD,
-        database: DB_DATABASE,
+        host: process.env.DB_HOST,
+        port: Number.parseInt(process.env.DB_PORT as string),
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE,
     },
 });
 
@@ -60,19 +68,21 @@ fastify.get("*", (req, res) => {
 });
 
 // live reload (only in dev)
-wss.on("connection", () => {});
-watcher.on("change", () => {
-    wss.clients.forEach((c) => {
-        if (c.readyState === 1) {
-            c.send("reload");
-        }
+if (process.env.NODE_ENV !== "production") {
+    wss.on("connection", () => {});
+    watcher.on("change", () => {
+        wss.clients.forEach((c) => {
+            if (c.readyState === 1) {
+                c.send("reload");
+            }
+        });
     });
-});
-fastify.server.on("upgrade", (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit("connection", ws, request);
+    fastify.server.on("upgrade", (request, socket, head) => {
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit("connection", ws, request);
+        });
     });
-});
+}
 
 (async function main() {
     try {

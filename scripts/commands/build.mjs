@@ -19,11 +19,6 @@ export default async function build(cfg) {
 
     required(entryPoint, "an entry point is required");
     required(outfile, "an output file is required");
-    required(db.host, "a database host is required");
-    required(db.port, "a database port is required");
-    required(db.user, "a database user is required");
-    required(db.password, "a database password is required");
-    required(db.database, "a database is required");
 
     await esb.build({
         entryPoints: [resolve(__dirname, "../../src/server.tsx")],
@@ -42,13 +37,14 @@ export default async function build(cfg) {
             "mysql",
             "sqlite3",
         ],
-        define: {
-            "process.env.DB_HOST": db.host,
-            "process.env.DB_PORT": db.port,
-            "process.env.DB_USER": db.user,
-            "process.env.DB_PASSWORD": db.password,
-            "process.env.DB_DATABASE": db.database,
-        },
+        // this part doesn't work, tried for hours before I gave up
+        // define: {
+        //     "process.env.DB_HOST": db.host,
+        //     "process.env.DB_PORT": db.port,
+        //     "process.env.DB_USER": db.user,
+        //     "process.env.DB_PASSWORD": db.password,
+        //     "process.env.DB_DATABASE": db.database,
+        // },
     });
 
     if (watch) {

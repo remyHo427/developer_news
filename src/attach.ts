@@ -12,11 +12,19 @@ export default function attach(fastify: FastifyInstance, knex: Knex) {
 
     for (const [k, r] of Object.entries(routes)) {
         console.log(`adding ${k} routes:`);
-        for (const [k, { method, route, handler }] of Object.entries(r)) {
+        for (const [k, { method, route, handler, options }] of Object.entries(
+            r,
+        )) {
             console.log(`\tadding ${k}...`);
-            map[method].bind(fastify)(`/api${route}`, (req, res) =>
-                handler(req, res, knex),
-            );
+            if (options !== undefined) {
+                map[method].bind(fastify)(`/api${route}`, options, (req, res) =>
+                    handler(req, res, knex),
+                );
+            } else {
+                map[method].bind(fastify)(`/api${route}`, (req, res) =>
+                    handler(req, res, knex),
+                );
+            }
         }
     }
 }
