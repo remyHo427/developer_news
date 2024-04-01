@@ -1,18 +1,30 @@
-import { DELETE, GET, POST, PUT } from "../types";
+import { DELETE, GET, POST, PUT, User } from "../types";
 
 export const GetUserById = new GET("/user/:name", async (req, res, knex) => {
     res.send(408);
 });
 export const CreateUser = new POST(
-    "/user/:name",
+    "/user",
     async (req, res, knex) => {
-        const { name, email, password } = req.body as {
+        const { email, password, name } = req.body as {
             name: string;
             email: string;
             password: string;
         };
 
-        await knex("User").insert({
+        const table = knex<User>(`User`);
+        const names = await table.select().where("name", name);
+        const emails = await table.select().where("email", email);
+
+        // check
+        if (names.length) {
+            res.status(409).send("Username already exists");
+        } else if (emails.length) {
+            res.status(409).send("Email already registered");
+        }
+
+        // insert
+        await table.insert({
             uuid: knex.raw("UUID_TO_BIN(UUID())"),
             name,
             email,

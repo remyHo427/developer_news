@@ -58,6 +58,7 @@ export class DELETE extends Route {
 export interface User {
     uuid: string;
     name: string;
-    password: string;
     email: string;
+    password: string;
+    createdAt: Date;
 }
