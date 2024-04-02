@@ -59,6 +59,7 @@ export interface User {
     uuid: string;
     name: string;
     email: string;
+    salt: string;
     password: string;
     createdAt: Date;
 }
