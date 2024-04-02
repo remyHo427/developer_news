@@ -12,9 +12,11 @@ export const CreateUser = new POST(
             password: string;
         };
 
-        const table = knex<User>("User");
-        const duplicateUser = await table.select().where("name", name).first();
-        const duplicateEmail = await table
+        const duplicateUser = await knex<User>("User")
+            .select()
+            .where("name", name)
+            .first();
+        const duplicateEmail = await knex<User>("User")
             .select()
             .where("email", email)
             .first();
@@ -33,7 +35,7 @@ export const CreateUser = new POST(
             .createHash("sha256")
             .update(password + PEPPER + salt)
             .digest("hex");
-        await table.insert({
+        await knex<User>("User").insert({
             uuid: knex.raw("UUID_TO_BIN(UUID())"),
             name,
             email,
@@ -73,16 +75,15 @@ export const UserLogin = new POST(
             .orWhere("email", login)
             .first();
 
+        // verify
         if (!user) {
             res.status(400).send("Invalid username/email or password");
             return;
         }
-
         const hashedPassword = crypto
             .createHash("sha256")
             .update(password + PEPPER + user.salt)
-            .digest("hex");
-
+            .digest("hex");\
         if (hashedPassword !== user.password) {
             res.status(400).send("Invalid username/email or password");
             return;
