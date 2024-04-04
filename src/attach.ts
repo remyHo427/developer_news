@@ -2,7 +2,10 @@ import { FastifyInstance } from "fastify";
 import { Knex } from "knex";
 import routes from "./routes/index";
 
-export default function attach(fastify: FastifyInstance, knex: Knex) {
+export default function attach<T extends FastifyInstance>(
+    fastify: T,
+    knex: Knex,
+) {
     const map = [
         fastify.get,
         fastify.post,

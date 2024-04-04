@@ -45,7 +45,7 @@ fastify.register(fastify_static, {
 });
 
 // attach api routes (has higher precedence than ssr)
-attach(fastify, knex);
+attach<typeof fastify>(fastify, knex);
 
 // ssr
 fastify.get("*", (req, res) => {
