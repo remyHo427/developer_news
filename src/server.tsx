@@ -5,6 +5,7 @@ import { Router } from "wouter-preact";
 import Fastify from "fastify";
 import fastify_static from "@fastify/static";
 import fastify_compress from "@fastify/compress";
+import fastify_cookie from "@fastify/cookie";
 import path, { resolve } from "node:path";
 import process from "node:process";
 import * as ws from "ws";
@@ -13,15 +14,6 @@ import chokidar from "chokidar";
 import App from "./app";
 import prerender, { html } from "./prerender";
 import attach from "./attach";
-
-// I really, really, **REALLY** don't want to use an
-// extra .env file, but esbuild refuses to transform
-// strings when I use the define option in build()
-
-// so I'm resorting to using dotenv for now, though
-// it annoys me to add another dependency because
-// an existing one fails to do what its documentation
-// says
 import "dotenv/config";
 
 const wss = new ws.WebSocketServer({ noServer: true });
@@ -42,6 +34,9 @@ const knex = knex_init({
 });
 
 // plugins
+fastify.register(fastify_cookie, {
+    secret: process.env.COOKIE_SECRET,
+});
 fastify.register(fastify_compress);
 fastify.register(fastify_static, {
     root: path.join(__dirname, "public"),

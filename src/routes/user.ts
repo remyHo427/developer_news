@@ -1,5 +1,6 @@
 import { POST, GET, User } from "../types";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 export const CreateUser = new POST(
     "/user",
@@ -36,7 +37,7 @@ export const CreateUser = new POST(
             .update(password + PEPPER + salt)
             .digest("hex");
         await knex<User>("User").insert({
-            uuid: knex.raw("UUID_TO_BIN(UUID())"),
+            uuid: crypto.randomUUID(),
             name,
             email,
             salt,
@@ -62,7 +63,11 @@ export const CreateUser = new POST(
 export const UserLogin = new POST(
     "/login",
     async (req, res, knex) => {
-        const { PEPPER } = process.env;
+        const { PEPPER, NODE_ENV, TOKEN_SECRET } = process.env as {
+            PEPPER: string;
+            NODE_ENV: string;
+            TOKEN_SECRET: string;
+        };
         const { login, password } = req.body as {
             login: string; // login is either email or username
             password: string;
@@ -83,13 +88,23 @@ export const UserLogin = new POST(
         const hashedPassword = crypto
             .createHash("sha256")
             .update(password + PEPPER + user.salt)
-            .digest("hex");\
+            .digest("hex");
         if (hashedPassword !== user.password) {
             res.status(400).send("Invalid username/email or password");
             return;
         }
 
         // issue token
+        const token = jwt.sign({ uuid: user.uuid }, TOKEN_SECRET, {
+            expiresIn: "1h",
+        });
+        res.setCookie("token", token, {
+            httpOnly: true,
+            maxAge: 3600,
+            path: "/",
+            secure: NODE_ENV === "production",
+        });
+
         res.send(200);
     },
     {
@@ -103,6 +118,17 @@ export const UserLogin = new POST(
                 required: ["login", "password"],
             },
         },
+    },
+);
+export const ChangePassword = new POST(
+    "/change_password",
+    async (req, res, knex) => {
+        const toks = req.cookies.token;
+        if (!toks) {
+            return res.status(400).send("Invalid request, contact developer.");
+        }
+
+        res.send(200);
     },
 );
 
