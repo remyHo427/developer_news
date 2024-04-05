@@ -6,6 +6,7 @@ import Fastify from "fastify";
 import fastify_static from "@fastify/static";
 import fastify_compress from "@fastify/compress";
 import fastify_cookie from "@fastify/cookie";
+import fastify_cors from "@fastify/cors";
 import path, { resolve } from "node:path";
 import process from "node:process";
 import * as ws from "ws";
@@ -42,6 +43,11 @@ fastify.register(fastify_static, {
     root: path.join(__dirname, "public"),
     prefix: "/",
     wildcard: false,
+});
+fastify.register(fastify_cors, {
+    origin: "*", // swap in production
+    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
 });
 
 // attach api routes (has higher precedence than ssr)

@@ -64,3 +64,14 @@ export interface User {
     createdAt: Date;
     karma: number;
 }
+
+// meta
+export enum Errno {
+    // general
+    UNKNOWN_ERR = 0,
+    INVALID_TOKEN,
+    // specific routes
+    USER_ALREADY_EXIST,
+    USER_EMAIL_REGISTERED,
+    USER_INVALID_LOGIN_OR_PASS,
+}

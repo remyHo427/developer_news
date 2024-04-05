@@ -1,15 +1,36 @@
+import { Errno } from "./types";
+
 const ROOT = "http://localhost:3000";
 
-export const UserLogin = async (login: string, password: string) =>
-    fetch(`${ROOT}/api/user/login`, {
-        method: "POST",
+interface Options {
+    method: "POST" | "GET" | "PUT" | "DELETE";
+    body?: Record<string, unknown>;
+}
+const req = async (path: string, opts: Options) => {
+    const res = await fetch(`${ROOT}${path}`, {
+        method: opts.method,
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+        body: JSON.stringify(opts.body),
+    });
+
+    if (res.status === 200) {
+        return res.json();
+    } else {
+        const errno = await res.text();
+        console.error(Errno[Number.parseInt(errno)]);
+        return errno;
+    }
+};
+
+export const UserLogin = async (login: string, password: string) =>
+    req("/api/user/login", {
+        method: "POST",
+        body: {
             login,
             password,
-        }),
-    }).then((res) => res.json());
+        },
+    });
 export const GetUserHeader = async () =>
-    fetch(`${ROOT}/api/user/header`).then((res) => res.json());
+    req("/api/user/header", { method: "GET" });

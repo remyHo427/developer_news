@@ -1,4 +1,4 @@
-import { POST, GET, User } from "../types";
+import { POST, GET, User, Errno } from "../types";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
@@ -28,9 +28,9 @@ export const CreateUser = new POST(
 
         // check
         if (duplicateUser) {
-            return res.status(409).send("Username already exists");
+            return res.status(409).send(Errno.USER_ALREADY_EXIST);
         } else if (duplicateEmail) {
-            return res.status(409).send("Email already registered");
+            return res.status(409).send(Errno.USER_EMAIL_REGISTERED);
         }
 
         // TODO: email verification
@@ -84,11 +84,11 @@ export const UserLogin = new POST(
 
         // verify
         if (!user) {
-            res.status(400).send("Invalid username/email or password");
+            res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
             return;
         }
         if (hpass(password, user.salt) !== user.password) {
-            res.status(400).send("Invalid username/email or password");
+            res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
             return;
         }
 
@@ -142,7 +142,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
         // check date
         const now = Date.now();
         if (iat * 1000 >= now || now >= exp * 1000) {
-            return res.status(400).send("Invalid token");
+            return res.status(400).send(Errno.INVALID_TOKEN);
         }
 
         // check if user exists by uuid
@@ -151,7 +151,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
             .where("uuid", uuid)
             .first();
         if (!user) {
-            return res.status(400).send("Invalid token");
+            return res.status(400).send(Errno.INVALID_TOKEN);
         }
 
         // check old password
@@ -188,29 +188,30 @@ export const ChangePasswordWhenLoggedIn = new POST(
 export const GetUserHeaderInfo = new GET(
     "/user/header",
     async (req, res, knex) => {
-        const toks = req.cookies.token;
-        if (!toks) {
-            return res.status(401);
-        }
+        return res.status(200);
+        // const toks = req.cookies.token;
+        // if (!toks) {
+        //     return res.status(401);
+        // }
 
-        const { uuid, iat, exp } = jwt.decode(toks) as {
-            uuid: string;
-            iat: number;
-            exp: number;
-        };
-        const now = Date.now();
-        if (iat * 1000 >= now || now >= exp * 1000) {
-            return res.status(400).send("Invalid token");
-        }
+        // const { uuid, iat, exp } = jwt.decode(toks) as {
+        //     uuid: string;
+        //     iat: number;
+        //     exp: number;
+        // };
+        // const now = Date.now();
+        // if (iat * 1000 >= now || now >= exp * 1000) {
+        //     return res.status(400).send(Errno.INVALID_TOKEN);
+        // }
 
-        const user = await knex<User>("User")
-            .select("name", "karma")
-            .where("uuid", uuid)
-            .first();
-        if (!user) {
-            return res.send(404);
-        }
+        // const user = await knex<User>("User")
+        //     .columns("name", "karma")
+        //     .where("uuid", uuid)
+        //     .first();
+        // if (!user) {
+        //     return res.send(404);
+        // }
 
-        return res.status(200).send(user);
+        // return res.status(200).send(user);
     },
 );
