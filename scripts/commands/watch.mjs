@@ -25,7 +25,7 @@ export default async function build() {
             "sqlite3",
         ],
     });
-    await esb.build({
+    const ctx = await esb.context({
         entryPoints: ["./src/client.tsx"],
         minify: true,
         sourcemap: true,
@@ -37,31 +37,6 @@ export default async function build() {
         metafile: true,
     });
 
-    // if (watch) {
-    //     const ctx = await esb.context({
-    //         entryPoints: [entryPoint],
-    //         minify,
-    //         sourcemap,
-    //         outfile,
-    //         bundle: true,
-    //         plugins: [sassPlugin()],
-    //         jsxFactory: "h",
-    //         jsxFragment: "fragment",
-    //         metafile: true,
-    //     });
-    //     await ctx.watch();
-    //     console.log("watching...");
-    // } else {
-    //     await esb.build({
-    //         entryPoints: [entryPoint],
-    //         minify,
-    //         sourcemap,
-    //         outfile,
-    //         bundle: true,
-    //         plugins: [sassPlugin()],
-    //         jsxFactory: "h",
-    //         jsxFragment: "fragment",
-    //         metafile: true,
-    //     });
-    // }
+    await ctx.watch();
+    console.log("watching...");
 }

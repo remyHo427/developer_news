@@ -6,8 +6,8 @@
   "license": "MIT",
   "scripts": {
     "build": "node ./scripts/main.mjs build",
+    "dev": "node ./scripts/main.mjs watch",
     "start": "node ./dist/out.cjs",
-    "dev": "node ./scripts/main.mjs build --watch",
     "lint": "eslint ."
   },
   "dependencies": {
