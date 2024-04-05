@@ -3,6 +3,7 @@ import { h } from "preact";
 import { Switch, Route } from "wouter-preact";
 import Home from "./pages/home";
 import Header from "./components/header";
+import Login from "./pages/login";
 
 export function App() {
     return (
@@ -13,7 +14,7 @@ export function App() {
                     <Home />
                 </Route>
                 <Route path="/login">
-                    <div>login</div>
+                    <Login />
                 </Route>
                 <Route>
                     <div>404</div>

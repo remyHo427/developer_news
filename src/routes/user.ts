@@ -122,6 +122,7 @@ export const ChangePasswordViaEmail = new POST(
     "/change_password_email",
     async (req, res, knex) => {
         // TODO: implement after email services are set up
+        return res.send(404);
     },
 );
 export const ChangePasswordWhenLoggedIn = new POST(
