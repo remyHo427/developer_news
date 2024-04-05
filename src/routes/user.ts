@@ -2,11 +2,15 @@ import { POST, GET, User } from "../types";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
+const hpass = (pass: string, salt: string) =>
+    crypto
+        .createHash("sha256")
+        .update(pass + process.env.PEPPER + salt)
+        .digest("hex");
+
 export const CreateUser = new POST(
     "/user",
     async (req, res, knex) => {
-        const salt = crypto.randomBytes(16).toString("hex");
-        const { PEPPER } = process.env;
         const { email, password, name } = req.body as {
             name: string;
             email: string;
@@ -32,10 +36,8 @@ export const CreateUser = new POST(
         // TODO: email verification
 
         // insert
-        const hashedPassword = crypto
-            .createHash("sha256")
-            .update(password + PEPPER + salt)
-            .digest("hex");
+        const salt = crypto.randomBytes(16).toString("hex");
+        const hashedPassword = hpass(password, salt);
         await knex<User>("User").insert({
             uuid: crypto.randomUUID(),
             name,
@@ -120,7 +122,13 @@ export const UserLogin = new POST(
         },
     },
 );
-export const ChangePassword = new POST(
+export const ChangePasswordViaEmail = new POST(
+    "/change_password_email",
+    async (req, res, knex) => {
+        // TODO: implement after email services are set up
+    },
+);
+export const ChangePasswordWhenLoggedIn = new POST(
     "/change_password",
     async (req, res, knex) => {
         const toks = req.cookies.token;
@@ -128,7 +136,55 @@ export const ChangePassword = new POST(
             return res.status(400).send("Invalid request, contact developer.");
         }
 
-        res.send(200);
+        const { uuid, iat, exp } = jwt.decode(toks) as {
+            uuid: string;
+            iat: number;
+            exp: number;
+        };
+
+        // check date
+        const now = Date.now();
+        if (iat * 1000 >= now || now >= exp * 1000) {
+            return res.status(400).send("Invalid token");
+        }
+
+        // check if user exists by uuid
+        const user = await knex<User>("User")
+            .select()
+            .where("uuid", uuid)
+            .first();
+        if (!user) {
+            return res.status(400).send("Invalid token");
+        }
+
+        // check old password
+        const { old_password, new_password } = req.body as {
+            old_password: string;
+            new_password: string;
+        };
+        const { password, salt } = user;
+        if (hpass(old_password, salt) !== password) {
+            return res.status(400).send("Old password is incorrect");
+        }
+
+        // update
+        await knex<User>("User")
+            .where("uuid", uuid)
+            .update({ password: hpass(new_password, salt) });
+
+        return res.send(200);
+    },
+    {
+        schema: {
+            body: {
+                type: "object",
+                properties: {
+                    old_password: { type: "string" },
+                    new_password: { type: "string" },
+                },
+                required: ["old_password", "new_password"],
+            },
+        },
     },
 );
 
