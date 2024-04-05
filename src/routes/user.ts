@@ -65,7 +65,7 @@ export const CreateUser = new POST(
 export const UserLogin = new POST(
     "/login",
     async (req, res, knex) => {
-        const { PEPPER, NODE_ENV, TOKEN_SECRET } = process.env as {
+        const { NODE_ENV, TOKEN_SECRET } = process.env as {
             PEPPER: string;
             NODE_ENV: string;
             TOKEN_SECRET: string;
@@ -87,11 +87,7 @@ export const UserLogin = new POST(
             res.status(400).send("Invalid username/email or password");
             return;
         }
-        const hashedPassword = crypto
-            .createHash("sha256")
-            .update(password + PEPPER + user.salt)
-            .digest("hex");
-        if (hashedPassword !== user.password) {
+        if (hpass(password, user.salt) !== user.password) {
             res.status(400).send("Invalid username/email or password");
             return;
         }
