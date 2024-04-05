@@ -63,7 +63,7 @@ export const CreateUser = new POST(
     },
 );
 export const UserLogin = new POST(
-    "/login",
+    "/user/login",
     async (req, res, knex) => {
         const { NODE_ENV, TOKEN_SECRET } = process.env as {
             PEPPER: string;
@@ -119,18 +119,18 @@ export const UserLogin = new POST(
     },
 );
 export const ChangePasswordViaEmail = new POST(
-    "/change_password_email",
+    "/user/change_password_email",
     async (req, res, knex) => {
         // TODO: implement after email services are set up
         return res.send(404);
     },
 );
 export const ChangePasswordWhenLoggedIn = new POST(
-    "/change_password",
+    "/user/change_password",
     async (req, res, knex) => {
         const toks = req.cookies.token;
         if (!toks) {
-            return res.status(400).send("Invalid request, contact developer.");
+            return res.status(401);
         }
 
         const { uuid, iat, exp } = jwt.decode(toks) as {
@@ -185,28 +185,32 @@ export const ChangePasswordWhenLoggedIn = new POST(
     },
 );
 
-// TODO
-export const GetUserInfo = new GET("/user/:name", async (req, res, knex) => {
-    // TODO: set up this API to return public user info
-    // for display in /user page in frontend
-    res.send(404);
-});
+export const GetUserHeaderInfo = new GET(
+    "/user/header",
+    async (req, res, knex) => {
+        const toks = req.cookies.token;
+        if (!toks) {
+            return res.status(401);
+        }
 
-// GET example
-// export const GetUserById = new GET("/user/:name", async (req, res, knex) => {
-//     const { name } = req.params as { name: string };
+        const { uuid, iat, exp } = jwt.decode(toks) as {
+            uuid: string;
+            iat: number;
+            exp: number;
+        };
+        const now = Date.now();
+        if (iat * 1000 >= now || now >= exp * 1000) {
+            return res.status(400).send("Invalid token");
+        }
 
-//     const table = knex<User>("User");
-//     const usr = await table.select().where("name", name).first();
+        const user = await knex<User>("User")
+            .select("name", "karma")
+            .where("uuid", uuid)
+            .first();
+        if (!user) {
+            return res.send(404);
+        }
 
-//     if (!usr) {
-//         res.status(404).send("User not found");
-//         return;
-//     }
-
-//     res.status(200).send({
-//         name: usr.name,
-//         email: usr.email,
-//         createdAt: usr.createdAt,
-//     });
-// });
+        return res.status(200).send(user);
+    },
+);

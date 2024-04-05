@@ -1,7 +1,7 @@
-// TODO: configure CORS and figure out a way to
-// embed API root path during build
+const ROOT = "http://localhost:3000";
+
 export const UserLogin = async (login: string, password: string) =>
-    fetch(`http://localhost:3000/api/login`, {
+    fetch(`${ROOT}/api/user/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -11,3 +11,5 @@ export const UserLogin = async (login: string, password: string) =>
             password,
         }),
     }).then((res) => res.json());
+export const GetUserHeader = async () =>
+    fetch(`${ROOT}/api/user/header`).then((res) => res.json());

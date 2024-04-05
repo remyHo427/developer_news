@@ -62,4 +62,5 @@ export interface User {
     salt: string;
     password: string;
     createdAt: Date;
+    karma: number;
 }

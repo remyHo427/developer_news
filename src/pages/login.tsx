@@ -1,8 +1,9 @@
 /** @jsx h */
 import { h } from "preact";
-import { useReducer } from "preact/hooks";
-import { Link } from "wouter-preact";
+import { useContext, useReducer } from "preact/hooks";
+import { Link, useLocation } from "wouter-preact";
 import { UserLogin } from "../api";
+import context from "../components/context";
 
 interface FormValues {
     login: string | null;
@@ -17,10 +18,12 @@ const reducer = (
 });
 
 const Login = () => {
+    const { dispatch } = useContext(context)!;
     const [values, setValues] = useReducer(reducer, {
         login: null,
         password: null,
     });
+    const [location, setLocation] = useLocation();
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -30,7 +33,14 @@ const Login = () => {
             values.password as string,
         );
 
-        console.log(res);
+        if (res === 200) {
+            dispatch({
+                isLoggedIn: true,
+            });
+            setLocation("/");
+        } else {
+            // display error
+        }
     };
     const onLoginChange = (e) => setValues({ login: e.target.value });
     const onPasswordChange = (e) => setValues({ password: e.target.value });

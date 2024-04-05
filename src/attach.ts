@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { Knex } from "knex";
 import routes from "./routes/index";
+import { Method } from "./types";
 
 export default function attach<T extends FastifyInstance>(
     fastify: T,
@@ -13,12 +14,11 @@ export default function attach<T extends FastifyInstance>(
         fastify.delete,
     ] as const;
 
-    for (const [k, r] of Object.entries(routes)) {
-        console.log(`adding ${k} routes:`);
-        for (const [k, { method, route, handler, options }] of Object.entries(
+    for (const [_, r] of Object.entries(routes)) {
+        for (const [_, { method, route, handler, options }] of Object.entries(
             r,
         )) {
-            console.log(`\tadding ${k}...`);
+            console.log(`\tadding ${Method[method]}:/api${route}"...`);
             if (options !== undefined) {
                 map[method].bind(fastify)(`/api${route}`, options, (req, res) =>
                     handler(req, res, knex),
