@@ -3,7 +3,7 @@ import { h } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { Link } from "wouter-preact";
 import context from "./context";
-import { GetUserHeader } from "../api";
+import { GetUserInfo } from "../api";
 
 const Header = () => {
     const [info, setInfo] = useState<{
@@ -15,7 +15,8 @@ const Header = () => {
     useEffect(() => {
         (async () => {
             if (state.isLoggedIn) {
-                const res = await GetUserHeader();
+                const res = await GetUserInfo();
+                console.log("RES: ", res);
                 setInfo(res);
             }
         })();

@@ -6,14 +6,18 @@ interface Options {
     method: "POST" | "GET" | "PUT" | "DELETE";
     body?: Record<string, unknown>;
 }
-const req = async (path: string, opts: Options) => {
-    const res = await fetch(`${ROOT}${path}`, {
-        method: opts.method,
+const req = async (path: string, opts?: Options) => {
+    const init: Record<string, unknown> = {
+        method: opts?.method || "GET",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(opts.body),
-    });
+    };
+    if (opts && opts.body) {
+        init.body = JSON.stringify(opts.body);
+    }
+
+    const res = await fetch(`${ROOT}${path}`, init);
 
     if (res.status === 200) {
         return res.json();
@@ -32,5 +36,4 @@ export const UserLogin = async (login: string, password: string) =>
             password,
         },
     });
-export const GetUserHeader = async () =>
-    req("/api/user/header", { method: "GET" });
+export const GetUserInfo = async () => req("/api/user/info", { method: "GET" });

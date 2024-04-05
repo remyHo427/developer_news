@@ -9,7 +9,7 @@ const hpass = (pass: string, salt: string) =>
         .digest("hex");
 
 export const CreateUser = new POST(
-    "/user",
+    "/user/register",
     async (req, res, knex) => {
         const { email, password, name } = req.body as {
             name: string;
@@ -46,7 +46,7 @@ export const CreateUser = new POST(
             password: hashedPassword,
         });
 
-        res.send(200);
+        return res.status(200).send();
     },
     {
         schema: {
@@ -84,12 +84,10 @@ export const UserLogin = new POST(
 
         // verify
         if (!user) {
-            res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
-            return;
+            return res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
         }
         if (hpass(password, user.salt) !== user.password) {
-            res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
-            return;
+            return res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
         }
 
         // issue token
@@ -103,7 +101,7 @@ export const UserLogin = new POST(
             secure: NODE_ENV === "production",
         });
 
-        res.send(200);
+        return res.send(200);
     },
     {
         schema: {
@@ -130,7 +128,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
     async (req, res, knex) => {
         const toks = req.cookies.token;
         if (!toks) {
-            return res.status(401);
+            return res.send(401);
         }
 
         const { uuid, iat, exp } = jwt.decode(toks) as {
@@ -161,7 +159,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
         };
         const { password, salt } = user;
         if (hpass(old_password, salt) !== password) {
-            return res.status(400).send("Old password is incorrect");
+            return res.status(400).send(Errno.USER_INCORRECT_OLD_PASS);
         }
 
         // update
@@ -186,32 +184,31 @@ export const ChangePasswordWhenLoggedIn = new POST(
 );
 
 export const GetUserHeaderInfo = new GET(
-    "/user/header",
+    "/user/info",
     async (req, res, knex) => {
-        return res.status(200);
-        // const toks = req.cookies.token;
-        // if (!toks) {
-        //     return res.status(401);
-        // }
+        const toks = req.cookies.token;
+        if (!toks) {
+            return res.send(401);
+        }
 
-        // const { uuid, iat, exp } = jwt.decode(toks) as {
-        //     uuid: string;
-        //     iat: number;
-        //     exp: number;
-        // };
-        // const now = Date.now();
-        // if (iat * 1000 >= now || now >= exp * 1000) {
-        //     return res.status(400).send(Errno.INVALID_TOKEN);
-        // }
+        const { uuid, iat, exp } = jwt.decode(toks) as {
+            uuid: string;
+            iat: number;
+            exp: number;
+        };
+        const now = Date.now();
+        if (iat * 1000 >= now || now >= exp * 1000) {
+            return res.status(400).send(Errno.INVALID_TOKEN);
+        }
 
-        // const user = await knex<User>("User")
-        //     .columns("name", "karma")
-        //     .where("uuid", uuid)
-        //     .first();
-        // if (!user) {
-        //     return res.send(404);
-        // }
+        const user = await knex<User>("User")
+            .columns("name", "karma")
+            .where("uuid", uuid)
+            .first();
+        if (!user) {
+            return res.status(404).send();
+        }
 
-        // return res.status(200).send(user);
+        return res.status(200).send(user);
     },
 );
