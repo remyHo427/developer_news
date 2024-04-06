@@ -9,6 +9,7 @@ import fastify_cookie from "@fastify/cookie";
 import fastify_cors from "@fastify/cors";
 import path, { resolve } from "node:path";
 import process from "node:process";
+import fs from "node:fs";
 import * as ws from "ws";
 import knex_init from "knex";
 import chokidar from "chokidar";
@@ -22,6 +23,11 @@ const watcher = chokidar.watch(resolve(__dirname, "./dist/public"));
 const pages_map = prerender("/", "/login");
 const fastify = Fastify({
     logger: false,
+    https: {
+        key: fs.readFileSync(resolve(__dirname, "./key.pem")),
+        cert: fs.readFileSync(resolve(__dirname, "./cert.pem")),
+        passphrase: process.env.HTTPS_PASS,
+    },
 });
 const knex = knex_init({
     client: "mysql2",

@@ -37,12 +37,20 @@ interface BadgeProps {
     karma: number | null;
 }
 const Badge = ({ name, karma }: BadgeProps) => {
-    return name !== null && karma !== null ? (
-        <div>
-            {name} ({karma})
+    const onClick = () => {};
+    return (
+        <div className="badge">
+            {name !== null && karma !== null ? (
+                <div>
+                    {name} ({karma})
+                </div>
+            ) : (
+                <div />
+            )}
+            <div className="logout" onClick={onClick}>
+                logout
+            </div>
         </div>
-    ) : (
-        <div />
     );
 };
 

@@ -26,4 +26,20 @@ div.header {
             }
         }
     }
+    div.badge {
+        display: flex;
+        div + div::before {
+            content: "";
+            display: inline-block;
+            height: 90%;
+            width: 1px;
+            background-color: black;
+            margin: 0 0.5rem;
+            vertical-align: -25%;
+        }
+        div.logout {
+            cursor: pointer;
+            user-select: none;
+        }
+    }
 }

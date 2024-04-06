@@ -1,6 +1,6 @@
 import { Errno } from "./types";
 
-const ROOT = "http://localhost:3000";
+const ROOT = "https://localhost:3000";
 
 interface Options {
     method: "POST" | "GET" | "PUT" | "DELETE";

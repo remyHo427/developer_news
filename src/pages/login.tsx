@@ -28,18 +28,18 @@ const Login = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
 
-        const res = await UserLogin(
+        const { errno, status, data } = await UserLogin(
             values.login as string,
             values.password as string,
         );
 
-        if (res === 200) {
+        if (status !== 200) {
+            // display error
+        } else {
             dispatch({
                 isLoggedIn: true,
             });
             setLocation("/");
-        } else {
-            // display error
         }
     };
     const onLoginChange = (e) => setValues({ login: e.target.value });
