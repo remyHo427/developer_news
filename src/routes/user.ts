@@ -83,10 +83,7 @@ export const UserLogin = new POST(
             .first();
 
         // verify
-        if (!user) {
-            return res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
-        }
-        if (hpass(password, user.salt) !== user.password) {
+        if (!user || hpass(password, user.salt) !== user.password) {
             return res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
         }
 
@@ -101,7 +98,7 @@ export const UserLogin = new POST(
             secure: NODE_ENV === "production",
         });
 
-        return res.send(200);
+        return res.status(200).send();
     },
     {
         schema: {
@@ -120,7 +117,7 @@ export const ChangePasswordViaEmail = new POST(
     "/user/change_password_email",
     async (req, res, knex) => {
         // TODO: implement after email services are set up
-        return res.send(404);
+        return res.status(403).send();
     },
 );
 export const ChangePasswordWhenLoggedIn = new POST(
@@ -128,7 +125,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
     async (req, res, knex) => {
         const toks = req.cookies.token;
         if (!toks) {
-            return res.send(401);
+            return res.status(401).send();
         }
 
         const { uuid, iat, exp } = jwt.decode(toks) as {
@@ -167,7 +164,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
             .where("uuid", uuid)
             .update({ password: hpass(new_password, salt) });
 
-        return res.send(200);
+        return res.status(200).send();
     },
     {
         schema: {
