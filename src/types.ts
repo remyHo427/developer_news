@@ -67,6 +67,7 @@ export interface User {
 
 // meta
 export enum Errno {
+    CLEAR = -1,
     // general
     UNKNOWN_ERR = 0,
     INVALID_TOKEN,

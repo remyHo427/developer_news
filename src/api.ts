@@ -20,11 +20,11 @@ const req = async (path: string, opts?: Options) => {
     const res = await fetch(`${ROOT}${path}`, init);
 
     if (res.status === 200) {
-        return res.json();
+        return { data: await res.json(), errno: Errno.CLEAR, status: 200 };
     } else {
-        const errno = await res.text();
-        console.error(Errno[Number.parseInt(errno)]);
-        return errno;
+        const errno = Number.parseInt(await res.text());
+        console.error(Errno[errno]);
+        return { data: {}, errno, status: res.status };
     }
 };
 

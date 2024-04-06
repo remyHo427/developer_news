@@ -7,11 +7,30 @@ import Header from "./components/header";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import { useReducer } from "preact/hooks";
+import React from "preact/compat";
+import { GetUserInfo } from "./api";
 
 export function App() {
     const [state, dispatch] = useReducer(reducer, {
         isLoggedIn: false,
+        name: null,
+        karma: null,
     });
+
+    React.useEffect(() => {
+        (async () => {
+            const { data, errno, status } = await GetUserInfo();
+            if (status !== 200) {
+                // display with errno
+            } else {
+                dispatch({
+                    isLoggedIn: true,
+                    name: data.name,
+                    karma: data.karma,
+                });
+            }
+        })();
+    }, []);
 
     return (
         <div className="app">

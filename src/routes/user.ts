@@ -188,7 +188,7 @@ export const GetUserHeaderInfo = new GET(
     async (req, res, knex) => {
         const toks = req.cookies.token;
         if (!toks) {
-            return res.send(401);
+            return res.status(401).send();
         }
 
         const { uuid, iat, exp } = jwt.decode(toks) as {
