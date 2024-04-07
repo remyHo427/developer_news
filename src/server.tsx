@@ -24,8 +24,8 @@ const pages_map = prerender("/", "/login");
 const fastify = Fastify({
     logger: false,
     https: {
-        key: fs.readFileSync(resolve(__dirname, "./key.pem")),
-        cert: fs.readFileSync(resolve(__dirname, "./cert.pem")),
+        key: fs.readFileSync(resolve(__dirname, "../crypt/localhost.key")),
+        cert: fs.readFileSync(resolve(__dirname, "../crypt/localhost.crt")),
         passphrase: process.env.HTTPS_PASS,
     },
 });

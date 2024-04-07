@@ -1,6 +1,10 @@
+# generated folders
 node_modules/
 dist/
-config.json
-*.txt
+crypt/
+
+# env
 .env
-*.pem
+
+# extra
+notes/

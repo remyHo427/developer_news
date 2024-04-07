@@ -46,7 +46,7 @@ export const CreateUser = new POST(
             password: hashedPassword,
         });
 
-        return res.status(200).send();
+        return res.status(200).send({});
     },
     {
         schema: {
@@ -98,7 +98,7 @@ export const UserLogin = new POST(
             secure: NODE_ENV === "production",
         });
 
-        return res.status(200).send();
+        return res.status(200).send({});
     },
     {
         schema: {
@@ -164,7 +164,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
             .where("uuid", uuid)
             .update({ password: hpass(new_password, salt) });
 
-        return res.status(200).send();
+        return res.status(200).send({});
     },
     {
         schema: {
