@@ -10,8 +10,28 @@ interface Props {
     author: string;
 }
 
+const div = (a: number, b: number) => Math.trunc(a / b);
 const toDisplayStr = (date: number): string => {
-    return "1 hour";
+    const diff = Date.now() - date;
+    const s = div(diff, 1000);
+    const m = div(s, 60);
+    const h = div(m, 60);
+    const d = div(h, 24);
+    const y = div(d, 365);
+
+    if (!s) {
+        return `just now`;
+    } else if (!m) {
+        return `${s} seconds ago`;
+    } else if (!h) {
+        return `${m} minutes ago`;
+    } else if (!d) {
+        return `${h} hours ago`;
+    } else if (!y) {
+        return `${d} days ago`;
+    } else {
+        return `${y} years ago`;
+    }
 };
 const ThreadHeader = ({
     title,
@@ -24,7 +44,7 @@ const ThreadHeader = ({
     return (
         <div className="thread-header">
             <div className="control">
-                {rank} <button onClick={() => {}}>up</button>
+                {rank + 1 + "."} <button onClick={() => {}}>▲</button>
             </div>
             <div className="content">
                 <div className="primary">
@@ -35,7 +55,7 @@ const ThreadHeader = ({
                     <span>
                         {points} {points == 1 ? "point" : "points"} by&nbsp;
                         <span className="clickable">{author}</span>
-                        &nbsp;{toDisplayStr(publishedAt)} ago
+                        &nbsp;{toDisplayStr(publishedAt)}
                     </span>
                     <span className="clickable">hide</span>
                     <span className="clickable">past</span>

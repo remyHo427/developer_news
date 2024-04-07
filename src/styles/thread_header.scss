@@ -14,9 +14,16 @@
     p.sub {
         margin-left: 0.5rem;
     }
+    .control {
+        button {
+            border: none;
+            background-color: rgba(0, 0, 0, 0);
+        }
+    }
     .secondary {
         span.clickable {
             cursor: pointer;
+
             &:hover {
                 text-decoration: underline;
             }

@@ -25,7 +25,7 @@ const threads: {
         title: "The Windows XP Waltz [Video]",
         subtitle: "youtube.com",
         points: 23,
-        publishedAt: Date.now(),
+        publishedAt: Date.now(), // just now
         author: "mike_d",
     },
     {
@@ -67,14 +67,14 @@ const threads: {
         title: 'China\'s "overcapacity" reveals two different visions of the world',
         subtitle: "high-capacity.com",
         points: 3,
-        publishedAt: Date.now() - 5, // just now
+        publishedAt: Date.now() - 5 * 1000, // 5 seconds ago
         author: "gandan",
     },
     {
         title: "Tesla pitches robotaxi to stay relevant amid changing EV markets",
         subtitle: "notateslaapp.com",
         points: 1,
-        publishedAt: Date.now(), // just now
+        publishedAt: Date.now() - 10 * 1000, // 10 seconds ago
         author: "standfest",
     },
 ];
@@ -82,7 +82,7 @@ const threads: {
 const Home = () => {
     return (
         <div className="home">
-            {shuffle(threads).map((t, i) => (
+            {threads.map((t, i) => (
                 <ThreadHeader
                     title={t.title}
                     key={i}
