@@ -12,7 +12,7 @@ export default async function build() {
         bundle: true,
         outfile: resolve(__dirname, "../../dist/out.cjs"),
         platform: "node",
-        minify: false,
+        minify: true,
         sourcemap: true,
         format: "cjs",
         external: [
