@@ -9,7 +9,8 @@ import fastify_cookie from "@fastify/cookie";
 import fastify_cors from "@fastify/cors";
 import path, { resolve } from "node:path";
 import process from "node:process";
-import fs from "node:fs";
+import { readFileSync } from "node:fs";
+import https from "node:https";
 import * as ws from "ws";
 import knex_init from "knex";
 import chokidar from "chokidar";
@@ -18,16 +19,22 @@ import prerender, { html } from "./prerender";
 import attach from "./attach";
 import "dotenv/config";
 
-const wss = new ws.WebSocketServer({ noServer: true });
-const watcher = chokidar.watch(resolve(__dirname, "./dist/public"));
-const pages_map = prerender("/", "/login");
+const file_path = (path: string) => resolve(__dirname, path);
+const read = (path: string) => readFileSync(file_path(path));
+
+// SSL
+const cert = read("../crypt/localhost.crt");
+const key = read("../crypt/localhost.key");
+
+// auto reload
+const server = https.createServer({ cert, key });
+const wss = new ws.WebSocketServer({ server });
+const watcher = chokidar.watch(file_path("./dist/public"));
+
+// api
 const fastify = Fastify({
     logger: false,
-    https: {
-        key: fs.readFileSync(resolve(__dirname, "../crypt/localhost.key")),
-        cert: fs.readFileSync(resolve(__dirname, "../crypt/localhost.crt")),
-        passphrase: process.env.HTTPS_PASS,
-    },
+    https: { key, cert, passphrase: process.env.HTTPS_PASS },
 });
 const knex = knex_init({
     client: "mysql2",
@@ -60,6 +67,7 @@ fastify.register(fastify_cors, {
 attach<typeof fastify>(fastify, knex);
 
 // ssr
+const pages_map = prerender("/", "/login");
 fastify.get("*", (req, res) => {
     const [path, query] = req.url.split("?");
     const result =
@@ -93,6 +101,9 @@ if (process.env.NODE_ENV !== "production") {
 
 (async function main() {
     try {
+        server.listen(8080, () => {
+            console.log("wss server listening at 8080...");
+        });
         await fastify.listen({ port: 3000 });
     } catch (e) {
         fastify.log.error(e);

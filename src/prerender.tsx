@@ -38,7 +38,7 @@ export const html = (str: string) => `
             process.env.NODE_ENV !== "production"
                 ? `            
                     <script>
-                        const ws = new WebSocket('ws://localhost:3000');
+                        const ws = new WebSocket('wss://localhost:8080');
                         ws.addEventListener('message', (event) => {
                             if (event.data === 'reload') {
                                 window.location.reload();

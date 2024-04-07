@@ -1,12 +1,19 @@
-import { POST, GET, User, Errno } from "../types";
+import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import { POST, GET, User, Errno } from "../types";
 
+const read = (path: string) => readFileSync(resolve(__dirname, path));
 const hpass = (pass: string, salt: string) =>
     crypto
         .createHash("sha256")
         .update(pass + process.env.PEPPER + salt)
         .digest("hex");
+
+// RSA
+const private_key = read("../crypt/private.pem");
+const public_key = read("../crypt/public.pem");
 
 export const CreateUser = new POST(
     "/user/register",
@@ -65,10 +72,9 @@ export const CreateUser = new POST(
 export const UserLogin = new POST(
     "/user/login",
     async (req, res, knex) => {
-        const { NODE_ENV, TOKEN_SECRET } = process.env as {
+        const { NODE_ENV } = process.env as {
             PEPPER: string;
             NODE_ENV: string;
-            TOKEN_SECRET: string;
         };
         const { login, password } = req.body as {
             login: string; // login is either email or username
@@ -88,12 +94,17 @@ export const UserLogin = new POST(
         }
 
         // issue token
-        const token = jwt.sign({ uuid: user.uuid }, TOKEN_SECRET, {
-            expiresIn: "1h",
+        const token = jwt.sign({ uuid: user.uuid }, private_key, {
+            algorithm: "RS256",
+            expiresIn: "15m",
+            issuer: "developer news api",
+            subject: user.name,
+            audience: "https://developernews.net", // change to owned domain name
         });
+
         res.setCookie("token", token, {
             httpOnly: true,
-            maxAge: 3600,
+            maxAge: 1800,
             path: "/",
             secure: NODE_ENV === "production",
         });
@@ -128,7 +139,7 @@ export const ChangePasswordWhenLoggedIn = new POST(
             return res.status(401).send();
         }
 
-        const { uuid, iat, exp } = jwt.decode(toks) as {
+        const { uuid, iat, exp } = jwt.verify(toks, public_key) as {
             uuid: string;
             iat: number;
             exp: number;
