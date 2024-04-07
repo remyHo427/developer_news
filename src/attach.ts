@@ -20,7 +20,14 @@ export default function attach<T extends FastifyInstance>(
             map[method].bind(fastify)(
                 "/api" + route,
                 options || {},
-                (req, res) => handler(req, res, knex),
+                async (req, res) => {
+                    try {
+                        await handler(req, res, knex);
+                    } catch (e) {
+                        const [status, errno] = e;
+                        return res.status(status).send(errno);
+                    }
+                },
             ),
         );
 }

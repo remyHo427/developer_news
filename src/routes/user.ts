@@ -1,19 +1,12 @@
-import { resolve } from "node:path";
-import { readFileSync } from "node:fs";
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
 import { POST, GET, User, Errno } from "../types";
+import { sign, verify } from "../util";
 
-const read = (path: string) => readFileSync(resolve(__dirname, path));
 const hpass = (pass: string, salt: string) =>
     crypto
         .createHash("sha256")
         .update(pass + process.env.PEPPER + salt)
         .digest("hex");
-
-// RSA
-const private_key = read("../crypt/private.pem");
-const public_key = read("../crypt/public.pem");
 
 export const CreateUser = new POST(
     "/user/register",
@@ -35,9 +28,9 @@ export const CreateUser = new POST(
 
         // check
         if (duplicateUser) {
-            return res.status(409).send(Errno.USER_ALREADY_EXIST);
+            throw [409, Errno.USER_ALREADY_EXIST];
         } else if (duplicateEmail) {
-            return res.status(409).send(Errno.USER_EMAIL_REGISTERED);
+            throw [409, Errno.USER_EMAIL_REGISTERED];
         }
 
         // TODO: email verification
@@ -53,7 +46,7 @@ export const CreateUser = new POST(
             password: hashedPassword,
         });
 
-        return res.status(200).send({});
+        return res.status(200).send();
     },
     {
         schema: {
@@ -90,19 +83,10 @@ export const UserLogin = new POST(
 
         // verify
         if (!user || hpass(password, user.salt) !== user.password) {
-            return res.status(400).send(Errno.USER_INVALID_LOGIN_OR_PASS);
+            throw [400, Errno.USER_INVALID_LOGIN_OR_PASS];
         }
 
-        // issue token
-        const token = jwt.sign({ uuid: user.uuid }, private_key, {
-            algorithm: "RS256",
-            expiresIn: "15m",
-            issuer: "developer news api",
-            subject: user.name,
-            audience: "https://developernews.net", // change to owned domain name
-        });
-
-        res.setCookie("token", token, {
+        res.setCookie("token", sign(user.uuid, user.name), {
             httpOnly: true,
             maxAge: 1800,
             path: "/",
@@ -127,55 +111,36 @@ export const UserLogin = new POST(
 export const ChangePasswordViaEmail = new POST(
     "/user/change_password_email",
     async (req, res, knex) => {
-        // TODO: implement after email services are set up
+        // TODO: implement after email servicCes are set up
         return res.status(403).send();
     },
 );
 export const ChangePasswordWhenLoggedIn = new POST(
     "/user/change_password",
     async (req, res, knex) => {
-        const toks = req.cookies.token;
-        if (!toks) {
-            return res.status(401).send();
-        }
-
-        const { uuid, iat, exp } = jwt.verify(toks, public_key) as {
-            uuid: string;
-            iat: number;
-            exp: number;
+        const { uuid } = verify(req.cookies.token);
+        const { old_password, new_password } = req.body as {
+            old_password: string;
+            new_password: string;
         };
-
-        // check date
-        const now = Date.now();
-        if (iat * 1000 >= now || now >= exp * 1000) {
-            return res.status(400).send(Errno.INVALID_TOKEN);
-        }
-
-        // check if user exists by uuid
         const user = await knex<User>("User")
             .select()
             .where("uuid", uuid)
             .first();
         if (!user) {
-            return res.status(400).send(Errno.INVALID_TOKEN);
+            throw [400];
         }
 
-        // check old password
-        const { old_password, new_password } = req.body as {
-            old_password: string;
-            new_password: string;
-        };
         const { password, salt } = user;
         if (hpass(old_password, salt) !== password) {
-            return res.status(400).send(Errno.USER_INCORRECT_OLD_PASS);
+            throw [400, Errno.USER_INCORRECT_OLD_PASS];
         }
 
-        // update
         await knex<User>("User")
             .where("uuid", uuid)
             .update({ password: hpass(new_password, salt) });
 
-        return res.status(200).send({});
+        return res.status(200).send();
     },
     {
         schema: {
@@ -194,27 +159,14 @@ export const ChangePasswordWhenLoggedIn = new POST(
 export const GetUserHeaderInfo = new GET(
     "/user/info",
     async (req, res, knex) => {
-        const toks = req.cookies.token;
-        if (!toks) {
-            return res.status(401).send();
-        }
-
-        const { uuid, iat, exp } = jwt.decode(toks) as {
-            uuid: string;
-            iat: number;
-            exp: number;
-        };
-        const now = Date.now();
-        if (iat * 1000 >= now || now >= exp * 1000) {
-            return res.status(400).send(Errno.INVALID_TOKEN);
-        }
+        const { uuid } = verify(req.cookies.token);
 
         const user = await knex<User>("User")
             .columns("name", "karma")
             .where("uuid", uuid)
             .first();
         if (!user) {
-            return res.status(404).send();
+            throw [404];
         }
 
         return res.status(200).send(user);

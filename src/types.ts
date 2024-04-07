@@ -64,6 +64,15 @@ export interface User {
     createdAt: Date;
     karma: number;
 }
+export interface Thread {
+    uuid: string;
+    title: string;
+    url: string;
+    text: string;
+    votes: number;
+    createdAt: number;
+    author: string;
+}
 
 // meta
 export enum Errno {
