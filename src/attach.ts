@@ -24,8 +24,12 @@ export default function attach<T extends FastifyInstance>(
                     try {
                         await handler(req, res, knex);
                     } catch (e) {
-                        const [status, errno] = e;
-                        return res.status(status).send(errno);
+                        if (Array.isArray(e)) {
+                            const [status, errno] = e;
+                            return res.status(status).send(errno);
+                        } else {
+                            console.error(e);
+                        }
                     }
                 },
             ),
